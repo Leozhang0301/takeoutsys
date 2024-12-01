@@ -3,9 +3,11 @@ package com.sky.service.impl;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
+import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.entity.Employee;
+import com.sky.exception.AccountAlreadyExistException;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
@@ -77,11 +79,16 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setCreateTime(LocalDateTime.now());
         employee.setUpdateTime(LocalDateTime.now());
         
-        
-        employee.setCreateUser(10L);
-        employee.setUpdateUser(10L);
 
-        employeeMapper.insert(employee);
+        employee.setCreateUser(BaseContext.getCurrentId());
+        employee.setUpdateUser(BaseContext.getCurrentId());
+
+        if (employeeMapper.getByUsername(employee.getUsername())==null) {
+            employeeMapper.insert(employee);
+        }
+        else{
+            throw new AccountAlreadyExistException("用户已存在"); 
+        }
     }
 
 }
